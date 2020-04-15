@@ -75,10 +75,81 @@ function getMessageFrom(req,res) {
     })
 }
 
+function getCommunicateMost(req,res){
+    const Message = require('../models/message');
+    Message.aggregate([{$group:{_id:"$from",count:{$sum:1}}},{$sort:{count:-1}}],function (err,response) {
+        if (err) throw err;
+
+        res.status(200).send(response)
+    })
+
+}
+function getCommunicateMostPerRoom(req,res){
+    const Message = require('../models/message');
+    Message.aggregate([{$match:{room:parseInt(req.params.roomID)}},{$group:{_id:"$from",count:{$sum:1}}},{$sort:{count:-1}}],function (err,response) {
+        if (err) throw err;
+
+        res.status(200).send(response)
+    })
+
+}
+
+function getNumberMessageTotal(req,res){
+    const Message = require('../models/message');
+    Message.countDocuments({},function (err,response) {
+        if (err) throw err;
+
+        res.json("Number of documents in the collection: " + response)
+    })
+}
+
+function getNumberMessagePerRoom(req,res){
+    const Message = require('../models/message');
+    Message.countDocuments({room:req.params.roomID},function (err,response) {
+        if (err) throw err;
+
+        res.json("Number of documents in the room: "+req.params.roomID+" : " + response)
+    })
+}
+
+// MAP REDUCE PART 
+
+const o={}
+
+o.map = function () {
+    var contentSplitted = this.content.split(" ");
+
+    contentSplitted.forEach(function (contentItem) {
+        emit(contentItem,1);
+    })
+
+}
+
+o.reduce = function  (key, values) {
+
+    return Array.sum(values);
 
 
+}
+o.verbose=true;
+function getDetailsMessage(req,res){
+    const Message = require('../models/message');
+
+    Message.mapReduce(o,function (err,results,stats) {
+
+        if (err) throw err;
+        res.json(results)
+    })
+
+}
 
 module.exports.getPeopleConnectedByRoom=getPeopleConnectedByRoom;
 // module.exports.getPeopleConnected=getPeopleConnected;
+
+module.exports.getDetailsMessage=getDetailsMessage;
+module.exports.getNumberMessagePerRoom=getNumberMessagePerRoom;
+module.exports.getNumberMessageTotal=getNumberMessageTotal;
+module.exports.getCommunicateMostPerRoom=getCommunicateMostPerRoom;
+module.exports.getCommunicateMost=getCommunicateMost;
 module.exports.getMessageFrom=getMessageFrom;
 module.exports.postMessage = postMessage;

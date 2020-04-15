@@ -68,9 +68,9 @@ io.on('connection', function (socket) {
    */
   // for (i = 0; i < messages.length; i++) {
   //   if (messages[i].username !== undefined) {
-  //     socket.emit('chat-message', messages[i]);
+  //     socket.broadcast.to(user.room).emit('chat-message', messages[i]);
   //   } else {
-  //     socket.emit('service-message', messages[i]);
+  //     socket.broadcast.to(user.room).emit('service-message', messages[i]);
   //   }
   // }
 
@@ -128,7 +128,22 @@ io.on('connection', function (socket) {
       });
       rooms.find(x => x.id=== user.room).numUsers++;
       // Envoi et sauvegarde des messages de service
+<<<<<<< HEAD
       socket.join(user.room);
+=======
+      socket.join(user.room)
+      for (i = 0; i < messages.length; i++) {
+        if (messages[i].room == user.room){
+          if (messages[i].username !== undefined ) {
+            socket.emit('chat-message', messages[i]);
+          } else {
+            socket.emit('service-message', messages[i]);
+          }
+        }
+
+      }
+
+>>>>>>> ae6a2fed4e3bd73b3ccb62ca14a356b465c77483
 
       var userServiceMessage = {
         text: 'You logged in as "' + loggedUser.username + '" in the chat Number :' +loggedUser.room,
@@ -140,15 +155,31 @@ io.on('connection', function (socket) {
       };
       //emit logged as untel
       socket.emit('service-message', userServiceMessage);
-      // socket.nsp.in(user.room).emit('service-message', broadcastedServiceMessage);
-      // io.sockets.in(user.room).emit('service-message', userServiceMessage);
-      // io.sockets.in(user.room).emit('service-message', broadcastedServiceMessage);
-      // socket.nsp.to(user.room).emit('service-message', broadcastedServiceMessage);
       //emit to member of the room that a men will coming
       socket.broadcast.to(user.room).emit('service-message', broadcastedServiceMessage);
       messages.push(broadcastedServiceMessage);
+<<<<<<< HEAD
       // Emission de 'user-login' et appel du callback
       io.sockets.in(user.room).emit('user-login', [loggedUser,rooms.find(x => x.id === user.room).users]);
+=======
+
+
+      client.lpush(user.room,user.username)
+
+      client.lrange(user.room,0,-1,function (err,result){
+        if (err) {
+          /* handle error */
+        } else {
+          console.log(result);
+        }
+      });
+
+
+
+      // Emission de 'user-login' et appel du callback
+      io.sockets.in(user.room).emit('user-login', loggedUser);
+
+>>>>>>> ae6a2fed4e3bd73b3ccb62ca14a356b465c77483
       callback(true);
     } else {
       callback(false);
@@ -164,12 +195,6 @@ io.on('connection', function (socket) {
     message.username = loggedUser.username;
     message.room = loggedUser.room;
     message.date=new Date(new Date().setHours(new Date().getHours()+2,new Date().getMinutes(),new Date().getSeconds()));
-    console.log(new Date().setHours(new Date().getHours()+2,new Date().getMinutes(),new Date().getSeconds()));
-    console.log(new Date(new Date().setHours(00,00,00)));
-    console.log(new Date(new Date().setHours(23,59,59)));
-    console.log(new Date(new Date().setHours(new Date().getHours()-2,new Date().getMinutes(), new Date().getSeconds())))
-    console.log(new Date(new Date()))
-    console.log(new Date(new Date().setDate(new Date().getDate()-1)))
     io.sockets.in(message.room).emit('chat-message', message);
     // Sauvegarde du message
     messages.push(message);
@@ -208,6 +233,12 @@ io.on('connection', function (socket) {
     io.emit('update-typing', typingUsers);
   });
 });
+
+
+
+
+
+
 const mongoose = require('mongoose');
 database = 'mongodb://localhost:27019,localhost:27018,localhost:27020/TPchat?replicaSet=rs0';
 mongoose.connect(database,(err)=>{
