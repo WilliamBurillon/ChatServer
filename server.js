@@ -43,6 +43,7 @@ let rooms = [{
     'users':[]
   }];
 
+client.FLUSHALL();
 /**
  * Liste des utilisateurs en train de saisir un message
  */
@@ -85,10 +86,11 @@ io.on('connection', function (socket) {
       };
       socket.broadcast.to(loggedUser.room).emit('service-message', serviceMessage);
       // Suppression de la liste des connectés
-      var userIndex = users.indexOf(loggedUser);
-      if (userIndex !== -1) {
-        users.splice(userIndex, 1);
-      }
+      client.lrem(['Room' + loggedUser.room,0,loggedUser.username], function(err, reply) { 
+	    });
+	    client.lrange('Room' + loggedUser.room,0,-1, function(err,reply) { 
+		    rooms.find(x => x.id === loggedUser.room).users=reply;
+      });
       // Ajout du message à l'historique
       messages.push(serviceMessage);
       // Emission d'un 'user-logout' contenant le user
@@ -107,21 +109,26 @@ io.on('connection', function (socket) {
   socket.on('user-login', function (user, callback) {
     // Vérification que l'utilisateur n'existe pas
     var userIndex = -1;
-    for (i = 0; i < users.length; i++) {
-      if (users[i].username === user.username) {
-        userIndex = i;
+    for(nbRoom=0;nbRoom<rooms.length;nbRoom++){
+      var usersRoom = rooms.find(x => x.id === (nbRoom+1)).users;
+      for (i = 0; i < usersRoom.length; i++) {
+        if (usersRoom[i] === user.username) {
+          userIndex = i;
+        }
       }
     }
     if (user !== undefined && userIndex === -1) { // S'il est bien nouveau
       // Sauvegarde de l'utilisateur et ajout à la liste des connectés
       loggedUser = user;
       users.push(loggedUser);
-      rooms.find(x => x.id === user.room).users.push(user.username);
+      client.rpush(['Room' + loggedUser.room, loggedUser.username], function(err, reply) {
+      });
+      client.lrange('Room' + loggedUser.room,0,-1, function(err,reply) {
+        rooms.find(x => x.id === user.room).users=reply;
+      });
       rooms.find(x => x.id=== user.room).numUsers++;
-      // socket.join(user.room)
       // Envoi et sauvegarde des messages de service
-      socket.join(user.room)
-
+      socket.join(user.room);
 
       var userServiceMessage = {
         text: 'You logged in as "' + loggedUser.username + '" in the chat Number :' +loggedUser.room,
@@ -140,26 +147,8 @@ io.on('connection', function (socket) {
       //emit to member of the room that a men will coming
       socket.broadcast.to(user.room).emit('service-message', broadcastedServiceMessage);
       messages.push(broadcastedServiceMessage);
-      // controller.postMessage(broadcastedServiceMessage);
-
-      client.lpush(user.room,user.username)
-
-      // var elementToSocket = {
-      //   user : loggedUser,
-      //   userConnected : client.lrange(user.room,0,-1)
-      // };
-      client.lrange(user.room,0,-1,function (err,result){
-        if (err) {
-          /* handle error */
-        } else {
-          console.log(result);
-        }
-      });
-
-
-
       // Emission de 'user-login' et appel du callback
-      io.sockets.in(user.room).emit('user-login', loggedUser);
+      io.sockets.in(user.room).emit('user-login', [loggedUser,rooms.find(x => x.id === user.room).users]);
       callback(true);
     } else {
       callback(false);

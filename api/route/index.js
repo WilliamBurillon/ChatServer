@@ -20,5 +20,14 @@ router.post("/message",(req,res)=>{
 
 router.get("/messageFrom/:room&:dateFrom&:typeDate",(req,res)=>{
     controller.getMessageFrom(req,res);
-})
+});
+
+router.get("/users/:room",(req,res)=>{
+    controller.getPeopleConnectedByRoom(req,res);
+});
+
+// router.get("/users",(req,res)=>{
+//     controller.getPeopleConnected(req,res);
+// });
+
 module.exports=router;

@@ -1,3 +1,40 @@
+function getPeopleConnectedByRoom(req,res){
+    const redis = require('redis');
+    const client = redis.createClient();
+
+    client.lrange('Room' + req.params.room,0,-1, function(err,reply) {
+        if (err) return console.log(err);
+        res.status(200).send(reply);
+  });
+}
+
+// async function getPeopleConnected(req,res){
+//     const redis = require('redis');
+//     const client = redis.createClient();
+
+//     var nbRoom;
+//     var usersConnected = new Array();
+//     await client.keys('*', function (err, keys) {
+//         if (err) return console.log(err);
+//         nbRoom = keys.length;
+//         console.log(keys.length);
+//     });      
+//     console.log(nbRoom);
+//     //     for(i = 1; i < keys.length+1; i++) {
+//     //         console.log(i);
+//     //         client.lrange('Room' + i,0,-1, function(err,reply) {
+//     //             if (err) return console.log(err);
+//     //             for(j = 0; j < reply.length; j++){
+//     //                 console.log(reply[j]);
+//     //                 usersConnected.push(reply[j]);
+//     //             }
+//     //   });
+//     //   res.status(200).send(usersConnected);
+//     // }
+    
+// }
+
+
 function postMessage(req,res){
     const Message = require('../models/message');
 
@@ -41,6 +78,7 @@ function getMessageFrom(req,res) {
 
 
 
-
+module.exports.getPeopleConnectedByRoom=getPeopleConnectedByRoom;
+// module.exports.getPeopleConnected=getPeopleConnected;
 module.exports.getMessageFrom=getMessageFrom;
 module.exports.postMessage = postMessage;

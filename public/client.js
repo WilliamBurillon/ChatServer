@@ -70,19 +70,17 @@ socket.on('service-message', function (message) {
 
 /**
  * Connexion d'un nouvel utilisateur
- * fonction a modifier pour afficher message via redis
- *
  */
-socket.on('user-login', function (elementToSocket) {
-
-  // $('#users').append($('<li class="' + user.username + ' new">').html(user.username + '<span class="typing">typing</span>'));
-  // setTimeout(function () {
-  //   $('#users li.new').removeClass('new');
-  // }, 1000);
-
-  // console.log(elementToSocket.userConnected)
+socket.on('user-login', function (info) {
+  $('#users li').remove();
+  for (var j = 0; j < info[1].length; j++) {
+    $('#users').append($('<li class="' + info[1][j] + '">').html(info[1][j] + '<span class="typing">typing</span>'));
+  }
+  $('#users').append($('<li class="' + info[0].username + ' new">').html(info[0].username + '<span class="typing">typing</span>'));
+  setTimeout(function () {
+    $('#users li.new').removeClass('new');
+  }, 1000);
 });
-
 /**
  * Déconnexion d'un utilisateur
  */
