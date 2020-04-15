@@ -128,9 +128,6 @@ io.on('connection', function (socket) {
       });
       rooms.find(x => x.id=== user.room).numUsers++;
       // Envoi et sauvegarde des messages de service
-<<<<<<< HEAD
-      socket.join(user.room);
-=======
       socket.join(user.room)
       for (i = 0; i < messages.length; i++) {
         if (messages[i].room == user.room){
@@ -143,7 +140,6 @@ io.on('connection', function (socket) {
 
       }
 
->>>>>>> ae6a2fed4e3bd73b3ccb62ca14a356b465c77483
 
       var userServiceMessage = {
         text: 'You logged in as "' + loggedUser.username + '" in the chat Number :' +loggedUser.room,
@@ -158,28 +154,8 @@ io.on('connection', function (socket) {
       //emit to member of the room that a men will coming
       socket.broadcast.to(user.room).emit('service-message', broadcastedServiceMessage);
       messages.push(broadcastedServiceMessage);
-<<<<<<< HEAD
       // Emission de 'user-login' et appel du callback
       io.sockets.in(user.room).emit('user-login', [loggedUser,rooms.find(x => x.id === user.room).users]);
-=======
-
-
-      client.lpush(user.room,user.username)
-
-      client.lrange(user.room,0,-1,function (err,result){
-        if (err) {
-          /* handle error */
-        } else {
-          console.log(result);
-        }
-      });
-
-
-
-      // Emission de 'user-login' et appel du callback
-      io.sockets.in(user.room).emit('user-login', loggedUser);
-
->>>>>>> ae6a2fed4e3bd73b3ccb62ca14a356b465c77483
       callback(true);
     } else {
       callback(false);
