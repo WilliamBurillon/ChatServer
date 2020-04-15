@@ -67,9 +67,9 @@ io.on('connection', function (socket) {
    */
   // for (i = 0; i < messages.length; i++) {
   //   if (messages[i].username !== undefined) {
-  //     socket.emit('chat-message', messages[i]);
+  //     socket.broadcast.to(user.room).emit('chat-message', messages[i]);
   //   } else {
-  //     socket.emit('service-message', messages[i]);
+  //     socket.broadcast.to(user.room).emit('service-message', messages[i]);
   //   }
   // }
 
@@ -121,6 +121,16 @@ io.on('connection', function (socket) {
       // socket.join(user.room)
       // Envoi et sauvegarde des messages de service
       socket.join(user.room)
+      for (i = 0; i < messages.length; i++) {
+        if (messages[i].room == user.room){
+          if (messages[i].username !== undefined ) {
+            socket.emit('chat-message', messages[i]);
+          } else {
+            socket.emit('service-message', messages[i]);
+          }
+        }
+
+      }
 
 
       var userServiceMessage = {
@@ -133,21 +143,13 @@ io.on('connection', function (socket) {
       };
       //emit logged as untel
       socket.emit('service-message', userServiceMessage);
-      // socket.nsp.in(user.room).emit('service-message', broadcastedServiceMessage);
-      // io.sockets.in(user.room).emit('service-message', userServiceMessage);
-      // io.sockets.in(user.room).emit('service-message', broadcastedServiceMessage);
-      // socket.nsp.to(user.room).emit('service-message', broadcastedServiceMessage);
       //emit to member of the room that a men will coming
       socket.broadcast.to(user.room).emit('service-message', broadcastedServiceMessage);
       messages.push(broadcastedServiceMessage);
-      // controller.postMessage(broadcastedServiceMessage);
+
 
       client.lpush(user.room,user.username)
 
-      // var elementToSocket = {
-      //   user : loggedUser,
-      //   userConnected : client.lrange(user.room,0,-1)
-      // };
       client.lrange(user.room,0,-1,function (err,result){
         if (err) {
           /* handle error */
@@ -160,6 +162,7 @@ io.on('connection', function (socket) {
 
       // Emission de 'user-login' et appel du callback
       io.sockets.in(user.room).emit('user-login', loggedUser);
+
       callback(true);
     } else {
       callback(false);
@@ -175,12 +178,6 @@ io.on('connection', function (socket) {
     message.username = loggedUser.username;
     message.room = loggedUser.room;
     message.date=new Date(new Date().setHours(new Date().getHours()+2,new Date().getMinutes(),new Date().getSeconds()));
-    console.log(new Date().setHours(new Date().getHours()+2,new Date().getMinutes(),new Date().getSeconds()));
-    console.log(new Date(new Date().setHours(00,00,00)));
-    console.log(new Date(new Date().setHours(23,59,59)));
-    console.log(new Date(new Date().setHours(new Date().getHours()-2,new Date().getMinutes(), new Date().getSeconds())))
-    console.log(new Date(new Date()))
-    console.log(new Date(new Date().setDate(new Date().getDate()-1)))
     io.sockets.in(message.room).emit('chat-message', message);
     // Sauvegarde du message
     messages.push(message);
@@ -219,6 +216,12 @@ io.on('connection', function (socket) {
     io.emit('update-typing', typingUsers);
   });
 });
+
+
+
+
+
+
 const mongoose = require('mongoose');
 database = 'mongodb://localhost:27019,localhost:27018,localhost:27020/TPchat?replicaSet=rs0';
 mongoose.connect(database,(err)=>{
