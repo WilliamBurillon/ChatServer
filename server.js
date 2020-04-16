@@ -43,7 +43,12 @@ let rooms = [{
     'users':[]
   }];
 
+/**
+ * We clear the users' database
+ */  
 client.FLUSHALL();
+
+
 /**
  * Liste des utilisateurs en train de saisir un message
  */
@@ -55,24 +60,6 @@ io.on('connection', function (socket) {
    * Utilisateur connecté à la socket
    */
   var loggedUser;
-
-  /**
-   * Emission d'un événement "user-login" pour chaque utilisateur connecté
-   */
-  //  for (i = 0; i < users.length; i++) {
-  //   socket.emit('user-login', users[i]);
-  // }
-
-  /**
-   * Emission d'un événement "chat-message" pour chaque message de l'historique
-   */
-  // for (i = 0; i < messages.length; i++) {
-  //   if (messages[i].username !== undefined) {
-  //     socket.broadcast.to(user.room).emit('chat-message', messages[i]);
-  //   } else {
-  //     socket.broadcast.to(user.room).emit('service-message', messages[i]);
-  //   }
-  // }
 
   /**
    * Déconnexion d'un utilisateur

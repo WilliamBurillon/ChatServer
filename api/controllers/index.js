@@ -8,31 +8,57 @@ function getPeopleConnectedByRoom(req,res){
   });
 }
 
-// async function getPeopleConnected(req,res){
-//     const redis = require('redis');
-//     const client = redis.createClient();
+function getCountPeopleConnectedByRoom(req,res){
+    const redis = require('redis');
+    const client = redis.createClient();
 
-//     var nbRoom;
-//     var usersConnected = new Array();
-//     await client.keys('*', function (err, keys) {
-//         if (err) return console.log(err);
-//         nbRoom = keys.length;
-//         console.log(keys.length);
-//     });      
-//     console.log(nbRoom);
-//     //     for(i = 1; i < keys.length+1; i++) {
-//     //         console.log(i);
-//     //         client.lrange('Room' + i,0,-1, function(err,reply) {
-//     //             if (err) return console.log(err);
-//     //             for(j = 0; j < reply.length; j++){
-//     //                 console.log(reply[j]);
-//     //                 usersConnected.push(reply[j]);
-//     //             }
-//     //   });
-//     //   res.status(200).send(usersConnected);
-//     // }
-    
-// }
+    client.lrange('Room' + req.params.room,0,-1, function(err,reply) {
+        if (err) return console.log(err);
+        res.status(200).send([reply.length]);
+  });
+}
+
+function getPeopleConnected(req,res){
+    const redis = require('redis');
+    const client = redis.createClient();
+
+    var usersConnected = new Array();
+
+    client.keys('*', function (err, keys) {
+        if (err) return console.log(err);
+        for(i = 1; i < keys.length+1; i++) {
+            client.lrange('Room' + i,0,-1, function(err,reply) {
+                if (err) return console.log(err);
+                for(j = 0; j < reply.length; j++){
+                    usersConnected.push(reply[j]);
+                }
+            });
+        }
+    });
+    setTimeout(function() {
+        res.status(200).send(usersConnected);
+    }, 2000);    
+}
+
+function getCountPeopleConnected(req,res){
+    const redis = require('redis');
+    const client = redis.createClient();
+
+    var numberUsersConnected = 0;
+
+    client.keys('*', function (err, keys) {
+        if (err) return console.log(err);
+        for(i = 1; i < keys.length+1; i++) {
+            client.lrange('Room' + i,0,-1, function(err,reply) {
+                if (err) return console.log(err);
+                numberUsersConnected = numberUsersConnected + reply.length;
+            });
+        }
+    });
+    setTimeout(function() {
+        res.status(200).send([numberUsersConnected]);
+    }, 2000);    
+}
 
 
 function postMessage(req,res){
@@ -144,8 +170,9 @@ function getDetailsMessage(req,res){
 }
 
 module.exports.getPeopleConnectedByRoom=getPeopleConnectedByRoom;
-// module.exports.getPeopleConnected=getPeopleConnected;
-
+module.exports.getPeopleConnected=getPeopleConnected;
+module.exports.getCountPeopleConnectedByRoom=getCountPeopleConnectedByRoom;
+module.exports.getCountPeopleConnected=getCountPeopleConnected;
 module.exports.getDetailsMessage=getDetailsMessage;
 module.exports.getNumberMessagePerRoom=getNumberMessagePerRoom;
 module.exports.getNumberMessageTotal=getNumberMessageTotal;
