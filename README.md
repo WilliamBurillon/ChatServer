@@ -57,18 +57,6 @@ fait, nous avons conçut une API permettant de faire une requête en BDD (où so
 depuis un certain moment. Exemple de requête : Avoir toutes les messages du salon 1 depuis 5 min,
 depuis le debut…
 
-Pour cela nous allons créer un repertoire de cette facon :
-
-Api
-|-------Controllers
-| |_ _ _ _ _message-controler.js
-|
-|---------------------Models
-| |_ _ _ _message.js
-|
-|------------------------------Routes
-|_ _ _ _ index.js
-
 Au niveau de l’url utlisé pour recuperer ces données, nous avons decider d’utiliser une requêtes http
 GET comme ceci : "/messageFrom/:room&:dateFrom&:typeDate" .
 
